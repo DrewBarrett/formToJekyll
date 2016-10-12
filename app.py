@@ -18,7 +18,15 @@ def hello():
     if request.method == "GET":
         return "incorrect usage"
     else:
-        return "correct usage" + g.get_user()
+        s = ""
+        for repo in g.get_user().get_repos():
+            s+= repo.name + " "
+        #s += g.get_user().get_repo("memeplatter.github.io").name
+        for repo in g.get_organization(os.environ.get("GIT_ORG")).get_repos():
+            s += repo.name + " "
+        s += g.get_organization(os.environ.get("GIT_ORG")).get_repo(os.environ.get("GIT_REPO")).name
+        return "correct usage " + s
+    
 
 if __name__ == '__main__':
     import os
