@@ -45,9 +45,13 @@ def hello():
         return "correct usage " + repo.name
     
 def createPost(repo, from_name, subject, message):
+    date = datetime.date.isoformat(datetime.date.today())
     path = "/_posts/" + datetime.date.isoformat(datetime.date.today()) + "-" + subject.lower() + ".md"
-    commit_message = "Jekyll post by formToJekyll"
+    commit_message = "Jekyll post by formToJekyll: " + subject
     content = ""
+    with open("template.md","r") as myFile:
+        content = myFile.read()
+    content.replace("{date}", date)
     repo.create_file(path, commit_message, content)
     return
 
