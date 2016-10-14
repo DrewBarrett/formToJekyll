@@ -41,22 +41,43 @@ def hello():
         from_name = request.form['name']
         subject = request.form['subject']
         message = request.form['message']
-        createPost(repo, from_name, subject, message)
-        return "correct usage " + repo.name
+        #return repo.name
+        #repo.create_file("/"+repo.name+"/test.md", "commit message", "commit content")
+        rMessage = createPost(repo, from_name, subject, message)
+        return rMessage
     
 def createPost(repo, from_name, subject, message):
     date = datetime.date.isoformat(datetime.date.today())
-    path = "/_posts/" + datetime.date.isoformat(datetime.date.today()) + "-" + subject.lower() + ".md"
+    path = "/_posts/" + str(datetime.date.isoformat(datetime.date.today())) + "-" + subject.lower() + ".md"
+    path = path.replace(" ", "-")
+    valid = False
+    i = 0
+    
+    while True:
+        try:
+            print(repo.get_file_contents(path).name)
+        except:
+            break
+        i += 1
+        path = path.replace(".md", str(i) + (".md"))
+    #there is no file with this name, yay!    
     commit_message = "Jekyll post by formToJekyll: " + subject
     content = ""
-    with open("template.md","r") as myFile:
-        content = myFile.read()
-    content.replace("{date}", date)
-    repo.create_file(path, commit_message, content)
-    return
+    try:
+        with open("template.md","r") as myFile:
+            content = myFile.read()
+    except:
+        return "could not read template.md"
+    content = content.replace("{date}", date)
+    content = content.replace("{title}", subject)
+    content = content.replace("{content}", message)
+    try:
+        repo.create_file(path, commit_message, content)
+    except:
+        return "failure creating file" + path
+    return "post successfully created!"
 
 if __name__ == '__main__':
-    import os
     HOST = os.environ.get('SERVER_HOST', 'localhost')
     try:
         PORT = int(os.environ.get('SERVER_PORT', '5555'))
